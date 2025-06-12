@@ -1,0 +1,38 @@
+# General project settings
+general:
+  experiment_name: "test_v2" # Name of the experiment
+
+# Model parameters
+model:
+  name: "UNET"
+  params:
+    in_channels: 1
+    out_channels: 1
+    features: [64, 128, 256, 512]
+
+# Training parameters
+training:
+  epochs: 100
+  batch_size: 4
+  learning_rate: 0.001
+  loss_function: "DiceLoss"
+  image_dir: "data/processed/train_images" # This now points to the processed output
+  mask_dir: "data/processed/train_masks"   # This now points to the processed output
+  val_split_ratio: 0.2
+  patch_size: [256, 256]
+  patch_stride: [128, 128]
+  num_workers: 0
+  device: "mps" # or "cuda" or "cpu"
+
+# Experiment tracking and logging
+logging:
+  base_log_dir: "runs/"           # <--- NEW: Base directory for all experiment logs
+  base_checkpoint_dir: "checkpoints/" # <--- NEW: Base directory for all model checkpoints
+  base_results_dir: "results/"      # <--- NEW: Base directory for all experiment results (e.g., history.json)
+  save_interval: 10 # Save checkpoint every X epochs
+
+# Inference parameters
+inference:
+  test_image_dir: "data/raw/stage1_test" # Path to your raw stage1_test dataset (used by image_processing.py if needed)
+  output_mask_dir: "results/predictions" # Where to save predicted masks (this will now be under the experiment's results folder)
+  display_limit: 5 # Limit the number of plots shown (0 for no plots, -1 for all)

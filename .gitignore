@@ -1,0 +1,42 @@
+# .gitignore
+
+.DS_Store           # macOS directory service stores
+.Trashes            # macOS trash
+Thumbs.db           # Windows thumbnail cache
+desktop.ini         # Windows folder customization
+
+
+__pycache__/        # Python bytecode cache directory
+*.pyc               # Python compiled bytecode files
+*.pyo
+*.pyd
+.Python             # macOS specific virtual environment
+venv/               # Virtual environment directory (common name)
+env/                # Another common name for virtual environment directory
+.env                # Environment variable files (e.g., for Flask)
+.venv/              # Another common name for virtual environment directory
+
+
+data/               
+data/
+*.png
+*.jpg
+*.jpeg
+
+
+*.png               # All PNG image files
+*.jpg               # All JPG image files
+*.jpeg              # All JPEG image files
+*.gif               # All GIF image files
+*.bmp               # All BMP image files
+*.tiff              # All TIFF image files
+*.tif               # All TIF image files
+*.webp              # All WebP image files
+
+
+mlruns/            
+checkpoints/
+*.pth
+results/    
+
+
