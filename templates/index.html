@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclei Segmentation Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px; /* Adjusted max-width for cleaner display */
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #0056b3;
+            margin: 0;
+        }
+        .view-toggle {
+            padding: 8px 15px;
+            font-size: 1em;
+            cursor: pointer;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            background-color: white;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .view-toggle:hover {
+            background-color: #e6f2ff;
+        }
+        .current-info {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .image-display {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Allows wrapping on smaller screens */
+        }
+        .image-box {
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            width: 45%; /* Adjusted width for two columns */
+            min-width: 280px; /* Minimum width to prevent images from becoming too small */
+            box-sizing: border-box;
+        }
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .controls button, .controls form button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s ease;
+            white-space: nowrap; /* Prevent button text from wrapping */
+        }
+        .controls button:hover, .controls form button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin-top: 20px;
+            color: #dc3545; /* Red for error messages */
+            font-weight: bold;
+        }
+        .info-message {
+            margin-top: 20px;
+            color: #28a745; /* Green for info messages */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Nuclei Segmentation Viewer</h1>
+            {% if view == 'train' %}
+            <form action="/evaluate_test_set" method="post">
+                <button type="submit">Run Model on ALL Test Images</button>
+            </form>
+            {% else %}
+            <a href="{{ url_for('train_view') }}" class="view-toggle">Back to Training Data</a>
+            {% endif %}
+        </div>
+
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+
+        {% if view == 'train' %}
+            <h2>Training Data: Image & Ground Truth Mask</h2>
+            <div class="current-info">Image ID: <code>{{ current_image_id }}</code> ({{ current_index }} / {{ num_images }})</div>
+        {% else %}
+            <h2>Test Data: Image & Predicted Mask</h2>
+            {% if num_images > 0 %}
+                <div class="current-info">Image ID: <code>{{ current_image_id }}</code> ({{ current_index }} / {{ num_images }})</div>
+            {% else %}
+                <div class="info-message">No predicted test images to display. Run evaluation first.</div>
+            {% endif %}
+        {% endif %}
+
+        {% if image_url and mask_url %}
+            <div class="image-display">
+                <div class="image-box">
+                    <h3>Original Image</h3>
+                    <img src="{{ image_url }}" alt="Original Image">
+                </div>
+                <div class="image-box">
+                    <h3>
+                        {% if view == 'train' %}
+                            Ground Truth Mask
+                        {% else %}
+                            Predicted Mask
+                        {% endif %}
+                    </h3>
+                    <img src="{{ mask_url }}" alt="Mask">
+                </div>
+            </div>
+        {% else %}
+            <p class="info-message">No images to display. Please ensure data is preprocessed and available.</p>
+        {% endif %}
+
+        {% if num_images > 0 %}
+            <div class="controls">
+                <a href="{{ url_for(view == 'train' and 'train_view' or 'test_results_view', action='prev') }}">
+                    <button type="button">Previous</button>
+                </a>
+                <a href="{{ url_for(view == 'train' and 'train_view' or 'test_results_view', action='next') }}">
+                    <button type="button">Next</button>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

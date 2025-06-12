@@ -58,15 +58,9 @@ class RandomRotation:
         # Convert back to numpy arrays
         image_rotated = np.array(image_rotated_pil)
 
-        # --- FIX IS HERE: Convert 0/255 mask to 0/1 float mask more robustly ---
-        # Method 1: Divide by 255.0. Assumes pixels are exactly 0 or 255.
+        
         mask_rotated = (np.array(mask_rotated_pil) / 255.0).astype(np.float32)
 
-        # Method 2 (Alternative - safer if values are slightly off due to interpolation):
-        # Convert to boolean (True/False based on non-zero), then to float32 (0.0/1.0)
-        # mask_rotated = (np.array(mask_rotated_pil) > 0).astype(np.float32)
-        # Choose Method 1 or 2. Method 1 is cleaner if Nearest Neighbor truly maintains 0/255.
-        # Let's stick with Method 1, as it's cleaner for properly binary values.
-        # --- END FIX ---
+        
 
         return {'image': image_rotated, 'mask': mask_rotated}

@@ -9,7 +9,8 @@ from tqdm import tqdm
 from torchvision import transforms as T
 
 # Add the project root to the sys.path to allow importing modules from src/
-project_root = os.path.dirname(os.path.abspath(__file__))
+# This assumes the script is in a subdirectory like src/inference/
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(project_root)
 
 # Import custom modules
@@ -72,14 +73,23 @@ def predict_full_image(model: torch.nn.Module, full_image_tensor: torch.Tensor, 
     stride_H, stride_W = patch_stride
 
     # Pad image to handle edge cases and ensure all areas are covered by patches
-    padded_H = int(np.ceil((H - patch_H) / stride_H)) * stride_H + patch_H if H > patch_H else patch_H
-    padded_W = int(np.ceil((W - patch_W) / stride_W)) * stride_W + patch_W if W > patch_W else patch_W
+    # Calculate padding needed to ensure image dimensions are multiples of stride and cover patches
+    padded_H = int(np.ceil(max(H, patch_H) / stride_H)) * stride_H if H % stride_H != 0 else H
+    padded_W = int(np.ceil(max(W, patch_W) / stride_W)) * stride_W if W % stride_W != 0 else W
     
+    # If the image is smaller than the patch, ensure padded_H/W are at least patch_H/W
+    padded_H = max(padded_H, patch_H)
+    padded_W = max(padded_W, patch_W)
+
     pad_bottom = padded_H - H
     pad_right = padded_W - W
     
-    padded_image = torch.nn.functional.pad(full_image_tensor, (0, pad_right, 0, pad_bottom), mode='reflect')
-    
+    # Pad only if necessary
+    if pad_bottom > 0 or pad_right > 0:
+        padded_image = torch.nn.functional.pad(full_image_tensor, (0, pad_right, 0, pad_bottom), mode='reflect')
+    else:
+        padded_image = full_image_tensor
+
     output_mask_sum = torch.zeros((1, padded_H, padded_W), dtype=torch.float32).to(device)
     overlap_counts = torch.zeros((1, padded_H, padded_W), dtype=torch.float32).to(device)
 
@@ -134,6 +144,12 @@ def evaluate_model():
     # 4. Set up Test Data Loading from processed folder
     processed_test_image_dir = os.path.join(project_root, 'data', 'processed', 'test_images')
     
+    # IMPORTANT NOTE:
+    # The official test set for this competition (like Kaggle 2018 Data Science Bowl)
+    # does NOT provide ground truth masks. Therefore, we cannot compute metrics
+    # like Dice Coefficient for these images.
+    # Dice Coefficient is typically computed on a held-out VALIDATION set during training.
+
     # Check if processed test images exist
     if not os.path.exists(processed_test_image_dir) or not os.listdir(processed_test_image_dir):
         print(f"Error: Processed test images not found in {processed_test_image_dir}.")
@@ -168,6 +184,9 @@ def evaluate_model():
 
     # Initialize a counter for the 'test_image_n' naming
     test_image_counter = 0
+
+    # Prepare for reporting results
+    report_data = []
 
     for i, img_path in enumerate(tqdm(test_image_paths, desc="Predicting masks")):
         original_image_id = os.path.splitext(os.path.basename(img_path))[0] # Original ID from filename
@@ -205,6 +224,15 @@ def evaluate_model():
         mask_save_path = os.path.join(output_mask_dir, f"{original_image_id}_pred_mask.png") # Keep original ID for saving
         predicted_mask_pil.save(mask_save_path)
 
+        # Store results for report
+        report_data.append({
+            'image_id': original_image_id,
+            'display_name': display_image_name,
+            'confidence': confidence,
+            'dice_coefficient': 'N/A (No Ground Truth)' # Explicitly state no Dice
+        })
+
+
         # Plot if within display limit
         if display_limit == -1 or num_plotted < display_limit:
             plt.figure(figsize=(12, 6))
@@ -226,6 +254,16 @@ def evaluate_model():
     print(f"\nInference complete. Predicted masks saved to {output_mask_dir}")
     if display_limit != 0:
         print(f"Displayed {num_plotted} images (up to display_limit={display_limit}).")
+
+    # 7. Generate and print the report
+    print("\n--- Inference Report ---")
+    print(f"{'Image ID':<40} | {'Display Name':<15} | {'Confidence':<12} | {'Dice Coeff.':<15}")
+    print("-" * 90)
+    for entry in report_data:
+        print(f"{entry['image_id']:<40} | {entry['display_name']:<15} | {entry['confidence']:.4f}{' ':>7} | {entry['dice_coefficient']:<15}")
+    print("-" * 90)
+    print("Note: Dice Coefficient for the test set cannot be computed as ground truth masks are not provided.")
+    print("For model evaluation, Dice Coefficient is typically computed on a held-out validation set during training.")
 
 
 if __name__ == "__main__":

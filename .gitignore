@@ -1,20 +1,20 @@
 # .gitignore
 
-.DS_Store           # macOS directory service stores
-.Trashes            # macOS trash
-Thumbs.db           # Windows thumbnail cache
-desktop.ini         # Windows folder customization
+.DS_Store           
+.Trashes           
+Thumbs.db          
+desktop.ini        
 
 
-__pycache__/        # Python bytecode cache directory
-*.pyc               # Python compiled bytecode files
+__pycache__/        
+*.pyc              
 *.pyo
 *.pyd
-.Python             # macOS specific virtual environment
-venv/               # Virtual environment directory (common name)
-env/                # Another common name for virtual environment directory
-.env                # Environment variable files (e.g., for Flask)
-.venv/              # Another common name for virtual environment directory
+.Python            
+venv/              
+env/               
+.env                
+.venv/              
 
 
 data/               

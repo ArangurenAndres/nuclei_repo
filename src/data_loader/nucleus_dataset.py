@@ -28,14 +28,7 @@ class NucleusDataset(Dataset):
     """
     def __init__(self, image_dir: str, mask_dir: str, patch_size: Tuple[int, int],
                  patch_stride: Tuple[int, int], transform=None):
-        """
-        Args:
-            image_dir (str): Directory with all the processed images.
-            mask_dir (str): Directory with all the processed combined masks.
-            patch_size (Tuple[int, int]): (height, width) of the patches to extract.
-            patch_stride (Tuple[int, int]): (vertical stride, horizontal stride) for patch extraction.
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
+        
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.patch_size = patch_size

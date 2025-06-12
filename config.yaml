@@ -45,4 +45,5 @@ logging:
 inference:
   test_image_dir: "data/raw/stage1_test"     # Path to raw test images
   output_mask_dir: "results/predictions"     # Directory where predicted masks will be saved
+  flask_output_mask_dir: "data/processed/flask_predictions"
   display_limit: 10                          # How many predictions to display (0 = none, -1 = all)
